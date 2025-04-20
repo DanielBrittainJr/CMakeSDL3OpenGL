@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.19.2)
 
-project(objectViewer)
+project(projectName)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
@@ -12,13 +12,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 file(GLOB_RECURSE MY_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
-add_executable(objectViewer ${MY_SOURCES})
+add_executable(${PROJECT_NAME} ${MY_SOURCES})
 
-target_include_directories(objectViewer
+target_include_directories(${PROJECT_NAME}
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_compile_definitions(
-  objectViewer PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/")
+  ${PROJECT_NAME} PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/")
 
 if(MSVC)
   target_compile_options(${PROJECT_NAME} PRIVATE /W4 /permissive-)
@@ -30,12 +30,10 @@ add_subdirectory(thirdparty/SDL3) # SDL3::SDL3-static
 add_subdirectory(thirdparty/glad)
 add_subdirectory(thirdparty/glm) # glm
 add_subdirectory(thirdparty/imgui) # imgui
-add_subdirectory(thirdparty/tinyobjloader) # tinyobjloader
 
 target_link_libraries(imgui PUBLIC SDL3::SDL3-static)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3-static glad glm imgui
-                                              tinyobjloader)
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3-static glad glm imgui)
 
 if(EXISTS "${PROJECT_SOURCE_DIR}/resources")
   add_custom_command(

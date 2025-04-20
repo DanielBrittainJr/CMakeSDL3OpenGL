@@ -14,6 +14,9 @@ Should work crossplatform and multi-IDE. (not tested properly)
 ## Resources
 All resource should be in the _resources_ folder. You can then access it with a macro **RESOURCE_PATH**. The _resources_ folder automatically copies to your build folder.
 <br>
-This setup is inspired by [@meemknight](https://github.com/meemknight) and his [Cmake video](https://www.youtube.com/watch?v=IBgfeZME2Vw)
+<br>
+<br>
+
+This setup is inspired by [@meemknight](https://github.com/meemknight) and his [Cmake video](https://www.youtube.com/watch?v=IBgfeZME2Vw).
 
 

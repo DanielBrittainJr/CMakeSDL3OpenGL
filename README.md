@@ -1,5 +1,5 @@
 # CMakeSDL3OpenGL
-![test](resources/img.png)
+![test](resourses/img.png)
 Setup for SDL3 and OpenGL with Cmake.
 All the libraries are **statically build**.
 Includes main.cpp file to test the libraries and .gitignore for common ignores.

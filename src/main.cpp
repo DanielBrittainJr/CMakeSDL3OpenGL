@@ -1,6 +1,7 @@
 // src/main.cpp
 
 #include <SDL3/SDL.h>
+#include <filesystem>
 #include <glad/glad.h>
 // --- New Includes ---
 #include <glm/glm.hpp>
@@ -13,27 +14,20 @@
 #include <iostream>
 #include <vector>
 
-static const char* kVertexShaderSrc = R"glsl(
-#version 330 core
-layout(location = 0) in vec2 aPos;
-uniform float uAngle;
-void main() {
-    mat2 rot = mat2(
-        cos(uAngle), -sin(uAngle),
-        sin(uAngle),  cos(uAngle)
-    );
-    gl_Position = vec4(rot * aPos, 0.0, 1.0);
-}
-)glsl";
+#include <fstream>
+#include <sstream>
 
-static const char* kFragmentShaderSrc = R"glsl(
-#version 330 core
-out vec4 FragColor;
-uniform vec4 uColor; // Added color uniform
-void main() {
-    FragColor = uColor; // Use the uniform
+std::string LoadShaderSource(const char* filepath) {
+    std::ifstream file(filepath);
+    if(!file) {
+        std::cerr << "Failed to open shader file: " << filepath << "\n";
+        std::exit(-1);
+    }
+
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
 }
-)glsl";
 
 static GLuint CompileShader(GLenum type, const char* src) {
     GLuint s = glCreateShader(type);
@@ -75,6 +69,9 @@ static GLuint LinkProgram(GLuint vs, GLuint fs) {
 }
 
 int main(int argc, char** argv) {
+
+    std::cout << "Working directory: " << std::filesystem::current_path() << "\n";
+
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
         std::cerr << "SDL_Init failed: " << SDL_GetError() << "\n";
         return -1;
@@ -135,8 +132,11 @@ int main(int argc, char** argv) {
     ImGui_ImplSDL3_InitForOpenGL(window, ctx);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    GLuint vs = CompileShader(GL_VERTEX_SHADER, kVertexShaderSrc);
-    GLuint fs = CompileShader(GL_FRAGMENT_SHADER, kFragmentShaderSrc);
+    std::string vertexSource = LoadShaderSource("src/shaders/vertex.glsl");
+    std::string fragmentSource = LoadShaderSource("src/shaders/fragment.glsl");
+
+    GLuint vs = CompileShader(GL_VERTEX_SHADER, vertexSource.c_str());
+    GLuint fs = CompileShader(GL_FRAGMENT_SHADER, fragmentSource.c_str());
     GLuint program = LinkProgram(vs, fs);
     glDeleteShader(vs); // Delete shaders after linking
     glDeleteShader(fs);

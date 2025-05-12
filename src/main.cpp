@@ -39,6 +39,7 @@ void PrintGLInfo();
 ImGuiIO& InitIMGUI(GLContext gl);
 void CleanupImgui();
 void CleanupSDL(GLContext gl);
+void ConfigImgui(ImGuiIO& io, glm::vec4 shapeColor, glm::vec4 clearColor);
 
 int main(int argc, char** argv) {
 
@@ -114,20 +115,9 @@ int main(int argc, char** argv) {
                     break;
             }
         }
+        //Imgui config
+        ConfigImgui(io, triangleColor, clearColor);
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL3_NewFrame();
-        ImGui::NewFrame();
-
-        ImGui::Begin("Settings");
-        ImGui::ColorEdit4("Clear Color", glm::value_ptr(clearColor));
-        ImGui::ColorEdit4("Triangle Color",
-                          glm::value_ptr(triangleColor));
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                    1000.0f / io.Framerate, io.Framerate);
-        ImGui::End();
-
-        ImGui::Render();
 
         auto t1 = std::chrono::high_resolution_clock::now();
         float s = std::chrono::duration<float>(t1 - t0).count();
@@ -301,6 +291,24 @@ void CleanupSDL(GLContext gl){
     SDL_GL_DestroyContext(gl.context);
     SDL_DestroyWindow(gl.window);
     SDL_Quit();
+
+    return;
+}
+void ConfigImgui(ImGuiIO& io,glm::vec4 shapeColor,glm::vec4 clearColor) {
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("Settings");
+    ImGui::ColorEdit4("Clear Color", glm::value_ptr(clearColor));
+    ImGui::ColorEdit4("Triangle Color",
+                      glm::value_ptr(shapeColor));
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+                1000.0f / io.Framerate, io.Framerate);
+    ImGui::End();
+
+    ImGui::Render();
 
     return;
 }

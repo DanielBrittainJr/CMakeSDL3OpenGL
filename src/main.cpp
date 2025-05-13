@@ -40,15 +40,19 @@ ImGuiIO& InitIMGUI(GLContext gl);
 void CleanupImgui();
 void CleanupSDL(GLContext gl);
 void ConfigImgui(ImGuiIO& io, glm::vec4 shapeColor, glm::vec4 clearColor);
+void SetupTriangle();
 
 int main(int argc, char** argv) {
 
+    //************************INIT PROGRAM*****************************
     InitSDL();
     SetGLAttributes();
     GLContext gl = InitSDLGL("Dematik", 1024, 768);
     PrintGLInfo();
     //Init IMGUI
     ImGuiIO& io = InitIMGUI(gl);
+
+    //*************************SHADER STUFF******************************
 
     //Load shaders from file
     std::string vertexSource = LoadShaderSource("src/shaders/vertex.glsl");
@@ -62,6 +66,10 @@ int main(int argc, char** argv) {
     GLuint program = LinkProgram(vs, fs);
     glDeleteShader(vs); // Delete shaders after linking
     glDeleteShader(fs);
+    
+
+    //Setup triangle
+    //void SetupTriangle();
 
     // --- Triangle Data ---
     float triVerts[] = {
@@ -83,15 +91,15 @@ int main(int argc, char** argv) {
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float),
                           (void*)0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    bool running = true;
     auto t0 = std::chrono::high_resolution_clock::now();
     glm::vec4 clearColor = glm::vec4(0.1f, 0.1f, 0.12f, 1.0f);
     glm::vec4 triangleColor = glm::vec4(1.0f, 0.5f, 0.1f, 1.0f); // Initial color
 
+    //***************************GAMELOOP***************************
+    bool running = true;
     while (running) {
+
+        //*****************POLL EVENTS********************
         SDL_Event ev;
         while (SDL_PollEvent(&ev)) {
             ImGui_ImplSDL3_ProcessEvent(&ev);
@@ -115,6 +123,7 @@ int main(int argc, char** argv) {
                     break;
             }
         }
+        //**********************GAME LOOP************************
         //Imgui config
         ConfigImgui(io, triangleColor, clearColor);
 
@@ -138,11 +147,10 @@ int main(int argc, char** argv) {
         glBindVertexArray(0); // Unbind VAO
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-
         SDL_GL_SwapWindow(gl.window);
     }
 
+    //**********************CLEANUP PROGRAM******************
     //Cleanup IMGUI
     CleanupImgui();
 
@@ -155,7 +163,7 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-
+//****************FUNCTION IMPLEMENTATIONS*************************
 static GLuint LinkProgram(GLuint vs, GLuint fs) 
 {
     GLuint p = glCreateProgram();
@@ -311,4 +319,7 @@ void ConfigImgui(ImGuiIO& io,glm::vec4 shapeColor,glm::vec4 clearColor) {
     ImGui::Render();
 
     return;
+}
+void SetupTriangle(){
+
 }

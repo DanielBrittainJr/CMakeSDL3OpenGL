@@ -6,6 +6,8 @@
 // --- New Includes ---
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp> // For glm::value_ptr
+#include "SDL3/SDL_error.h"
+#include "SDL3/SDL_log.h"
 #include "SDL3/SDL_video.h"
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
@@ -17,6 +19,9 @@
 
 #include <fstream>
 #include <sstream>
+
+//profiling
+#include <tracy/Tracy.hpp>
 
 /*
 * Load Shader File. Located in src/shaders.
@@ -43,6 +48,8 @@ void ConfigImgui(ImGuiIO& io, glm::vec4 shapeColor, glm::vec4 clearColor);
 void SetupTriangle();
 
 int main(int argc, char** argv) {
+	ZoneScoped;
+	ZoneName("Main Function", sizeof("Main Function"));
 
     //************************INIT PROGRAM*****************************
     InitSDL();
@@ -125,6 +132,8 @@ int main(int argc, char** argv) {
         }
         //**********************GAME LOOP************************
         //Imgui config
+	ZoneScoped;
+	ZoneName("GameLoop", sizeof("Gameloop"));
         ConfigImgui(io, triangleColor, clearColor);
 
 
@@ -238,14 +247,14 @@ GLContext InitSDLGL(const char* title, int width, int height) {
     );
 
     if (!gl.window) {
-        std::cerr << "SDL_CreateWindow failed: " << SDL_GetError() << "\n";
+	SDL_LogError(SDL_LOG_CATEGORY_ERROR, "SDL_CreateWindow failed: %s", SDL_GetError());
         SDL_Quit();
         std::exit(-1);
     }
 
     gl.context = SDL_GL_CreateContext(gl.window);
     if (!gl.context) {
-        std::cerr << "SDL_GL_CreateContext failed: " << SDL_GetError() << "\n";
+	SDL_LogError(SDL_LOG_CATEGORY_ERROR, "SDL_GL_CreateContext failed: %s", SDL_GetError());
         SDL_DestroyWindow(gl.window);
         SDL_Quit();
         std::exit(-1);
@@ -256,6 +265,7 @@ GLContext InitSDLGL(const char* title, int width, int height) {
 
     if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
         std::cerr << "Failed to initialize GLAD\n";
+	SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init GlAD: %s", SDL_GetError());
         SDL_GL_DestroyContext(gl.context);
         SDL_DestroyWindow(gl.window);
         SDL_Quit();

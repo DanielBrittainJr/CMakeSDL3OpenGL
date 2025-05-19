@@ -1,40 +1,56 @@
-cmake_minimum_required(VERSION 4.0)
-
+cmake_minimum_required(VERSION 4.0) 
 project(projectName)
 
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+include(FetchContent)
 
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+FetchContent_Declare(
+	tracy
+	GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+	GIT_TAG		v0.11.1
+	GIT_SHALLOW	TRUE
+	GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(tracy)
+
 file(GLOB_RECURSE MY_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 add_executable(${PROJECT_NAME} ${MY_SOURCES})
 
+# Your project includes
 target_include_directories(${PROJECT_NAME}
-                           PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_compile_definitions(
-  ${PROJECT_NAME} PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/")
+# Resource path macro
+target_compile_definitions(${PROJECT_NAME}
+    PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/")
 
+# Warnings
 if(MSVC)
   target_compile_options(${PROJECT_NAME} PRIVATE /W4 /permissive-)
 else()
   target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
+# Add subprojects
 add_subdirectory(thirdparty/SDL3) # SDL3::SDL3-static
 add_subdirectory(thirdparty/glad)
-add_subdirectory(thirdparty/glm) # glm
+add_subdirectory(thirdparty/glm)  # glm
 add_subdirectory(thirdparty/imgui) # imgui
 
 target_link_libraries(imgui PUBLIC SDL3::SDL3-static)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3-static glad glm imgui)
+# Final game engine links
+target_link_libraries(${PROJECT_NAME}
+  PRIVATE SDL3::SDL3-static glad glm imgui Tracy::TracyClient)
 
+# Resource copy after build
 if(EXISTS "${PROJECT_SOURCE_DIR}/resources")
   add_custom_command(
     TARGET ${PROJECT_NAME}
